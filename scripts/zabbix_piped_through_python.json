@@ -1,3 +1,0 @@
-zabbix_data_test.csv.gz: {"somekey1": "somevalue1", "somekey2": "somevalue2", "somekey3": "somevalue3"}
-zabbix_data_test.csv.gz: {"somekey11": "somevalue12", "somekey22": "somevalue22", "somekey32": "somevalue32"}
-zabbix_data_test.csv.gz: {"somekey12": "somevalue13", "somekey23": "somevalue23", "somekey33": "somevalue33"}
