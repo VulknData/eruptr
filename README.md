@@ -100,7 +100,7 @@ Let's use one of the provided examples. This assumes you have a ClickHouse
 server running on your local system listening on standard ports with no default
 credentials (default/empty password).
 
-simple1.yaml:
+Create the following file - simple1.yaml:
 
 ```yaml
 name: Simple1 Batch Job
@@ -160,7 +160,7 @@ clean:
 First lets generate some test data:
 
 ```bash
-eruptr load --conf ../examples/simple1/simple1.yaml --log-level INFO --flows data
+eruptr load --conf simple1.yaml --log-level INFO --flows data
 
 VulknData Eruptr (C) 2020 VulknData, Jason Godden
 
@@ -182,7 +182,7 @@ specify any flows eruptr automatically runs only the enabled workflows in the
 order they're defined (create, pre and input).
 
 ```bash
-eruptr load --conf ../examples/simple1/simple1.yaml --log-level INFO
+eruptr load --conf simple1.yaml --log-level INFO
 
 VulknData Eruptr (C) 2020 VulknData, Jason Godden
 
