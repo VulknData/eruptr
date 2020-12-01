@@ -49,10 +49,7 @@ def local(
     cmd = ['clickhouse-local', '--query', run]
     if format:
         cmd += ['--output-format', format]
-        __context__.current.format = format
-    stdout = __context__.current.get('stdout', subprocess.PIPE)
-    __context__.current.stdout = stdout
-    proc = UnixPipeProcess(cmd, env=env, stdout=stdout, stdin=None)
+    proc = UnixPipeProcess(cmd, env=env, stdout=subprocess.PIPE, stdin=None)
     return (proc, __context__)
 
 
@@ -69,9 +66,6 @@ def select(
     cmd = ['clickhouse-client', '-q', run]
     if format:
         cmd += ['--output-format', format]
-        __context__.current.format = format
-    stdout = __context__.current.get('stdout', subprocess.PIPE)
-    __context__.current.stdout = stdout
     for k, v in _conn.items():
         if v and k != 'scheme':
             if k == 'port':
@@ -79,7 +73,7 @@ def select(
             cmd += [f'--{k}', v]
     for k, v in options.items():
         cmd += [f'--{k}', str(v)]
-    proc = UnixPipeProcess(cmd, env=env, stdout=stdout, stdin=None)
+    proc = UnixPipeProcess(cmd, env=env, stdout=subprocess.PIPE, stdin=None)
     return (proc, __context__)
 
 
