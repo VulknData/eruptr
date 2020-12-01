@@ -1,0 +1,69 @@
+foo: {{ tasks['clickhouse.evaluate']('select toStartOfDay(now())') }}
+name: Zabbix Data
+defaults:
+    handlers:
+        locks: locks.filesystem
+        input_sql_insert: pipes.clickhouse.cli_insert
+        input_sql_stream: pipes.clickhouse.local
+        input_io_stream: pipes.shell.pipeline
+        transform_sql_query: engines.clickhouse.execute
+        transform_sql_select: engines.clickhouse.select
+        transform_shell: tasks.shell.run
+        evaluator: engines.clickhouse.evaluate
+    params:
+        connection:  http://localhost/test
+shard: localhost
+locks:
+    - module: locks.filesystem
+      locks:
+        - exclusive: zabbix_data
+vars:
+    dt:
+        module: engines.clickhouse.evaluate
+        run: SELECT now()
+input:
+    - module: pipes.shell.cmd
+      run:
+        - pigz -d
+        - grep '.*,.*,.*,.*'
+    - module: pipes.clickhouse.cli_insert
+      connection: clickhouse://localhost/test
+      target_table: test.zabbix_data
+      input_format: CSV
+      run: |
+          SELECT
+              device,
+              toDateTime(epoch_dt) AS t_dt,
+              value,
+              tag,
+              'file' AS sys_source_type,
+              basename('{{ opts.name or opts.source }}') AS sys_source,
+              now() AS sys_dt_created
+          FROM input('device String, epoch_dt DateTime, value Float32, tag String')
+transform:
+    - module: engines.clickhouse.execute
+      run:
+          - OPTIMIZE TABLE test.zabbix_data
+          - DROP TABLE IF EXISTS test.tmp_zabbix_data_summary
+          - CREATE TABLE IF NOT EXISTS test.zabbix_data_summary ENGINE = MergeTree ORDER BY t_dt AS SELECT * FROM test.zabbix_data
+          - CREATE TABLE IF NOT EXISTS test.tmp_zabbix_data_summary ENGINE = MergeTree ORDER BY t_dt AS SELECT * FROM test.zabbix_data
+          - EXCHANGE TABLES test.zabbix_data_summary AND test.tmp_zabbix_data_summary
+          - DROP TABLE IF EXISTS test.tmp_zabbix_data_summary
+      connection: http://localhost/test
+      insecure: True
+create:
+    - |
+        CREATE TABLE IF NOT EXISTS test.zabbix_data
+        (
+            device String COMMENT '@dimension: Zabbix monitored device name',
+            t_dt DateTime COMMENT '@timeseries: Series key',
+            value Float32 COMMENT '@metric: Metric value',
+            tag String COMMENT '@dimension: Column name',
+            sys_source_type String COMMENT '@system: Source type (file/table/stream)',
+            sys_source String COMMENT '@system: Source filename',
+            sys_dt_created DateTime COMMENT '@system: Record creation timestamp'
+        )
+        ENGINE = MergeTree
+        ORDER BY t_dt
+drop:
+    - DROP TABLE IF EXISTS test.zabbix_data

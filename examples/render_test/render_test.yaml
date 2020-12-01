@@ -1,0 +1,47 @@
+name: test datasource
+shard: SELECT 1
+vars:
+    t_d: SELECT '{{ vars.k }}'
+locks:
+    - lock:
+        module: locks.filesystem
+        base_path: /tmp
+        locks:
+            - exclusive: SELECT basename('{{ opts.name }}')
+            - shared: SELECT '{{ vars.t_d }}'
+            - shared: SELECT sdfsdf {{ cfg.shard }}
+pre:
+    - Trigger filesystem point:
+        module: executors.shell.run
+        cmd: cat /etc/passwd | grep jason
+    - Execute some ClickHouse code:
+        module: executors.clickhouse.select
+        query: SELECT * FROM system.tables
+input:
+    - Get file data from stdin:
+        module: io.file.read
+        path: /tmp/sdfsdf.csv.gz
+    - Extract and parse:
+        module: streams.shell.pipeline
+        cmd: pigz -d 2>/dev/null | grep '.*,.*,.*,.*'
+    - Insert into ClickHouse:
+        module: io.clickhouse.insert
+        query: |
+            INSERT INTO table.file
+            SELECT
+              *
+            FROM input('data String')
+            FORMAT CSV
+transform:
+    - Execute some python:
+        module: executors.python.run
+        code: |
+          x = range(0,10)
+
+          list(x)
+    - Trigger filesystem point:
+        module: executors.shell.run
+        cmd: cat /etc/passwd | grep jason
+    - Execute some ClickHouse code:
+        module: executors.clickhouse.select
+        query: SELECT * FROM system.tables

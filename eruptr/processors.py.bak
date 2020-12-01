@@ -1,0 +1,106 @@
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2020, Jason Godden <jason@godden.id.au>
+# Copyright (c) 2020, VulknData Pty Ltd
+# GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# SPDX-License-Identifier: GPL-3.0-only
+
+
+import logging
+import subprocess
+import types
+from abc import ABCMeta, abstractmethod
+
+
+import eruptr.utils
+
+
+log = logging.getLogger()
+
+
+class UnixPipeProcess:
+    def __init__(
+        self,
+        cmd,
+        env=None,
+        on_start=None,
+        on_end=None,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        context=None
+    ):
+        self._cmd = cmd
+        self.env = env
+        self._on_start = on_start
+        self._on_end = on_end
+        self.stdin = stdin
+        self.stdout = stdout
+        self.context = context or {}
+
+    @property
+    def cmd(self):
+        if isinstance(self._cmd, str):
+            return [self._cmd]
+        elif isinstance(self._cmd, list):
+            return self._cmd
+        else:
+            return self._cmd()
+
+    def on_start_hook(self):
+        if self._on_start:
+            return self._on_start()
+
+    def on_end_hook(self):
+        if self._on_end:
+            return self._on_end()
+
+    def __str__(self):
+        return (
+            f'UnixPipeProcess({self.cmd}, {self.env}, {self.on_start_hook}, '
+            f'{self.on_end_hook}, {self.stdin}, {self.stdout}, {self.context})'
+        )
+
+
+class Context:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self._current = types.SimpleNamespace
+
+    @property
+    def current(self):
+        return self._current
+
+
+class UnixPipeProcessor(metaclass=ABCMeta):
+    def __init__(self, run=None, context=None, env=None, **kwargs):
+        self._run = run
+        self._context = context if context else {}
+        self._env = env if env else {'LC_ALL': 'C'}
+        self._kwargs = kwargs
+
+    @property
+    def __procname__(self):
+        return f"{self.__module__}.{self.__class__.__name__}"
+
+    def __repr__(self):
+        return '{}(run={}, context={}, env={}, kwargs={})'.format(
+            self.__procname__,
+            eruptr.utils.flatten(f'"{self._run}"' if self._run else 'None'),
+            self._context,
+            self._env,
+            self._kwargs
+        )
+
+    @staticmethod
+    def StreamProcess(cmd, env=None, stream_input=None, stream_output=None):
+        env = env if env else {'LC_ALL': 'C'}
+        return subprocess.Popen(
+            cmd,
+            env=env,
+            stdin=stream_input,
+            stdout=stream_output,
+            stderr=subprocess.PIPE
+        )
+
+    def stream(self, env=None, context=None, input_stream=None, output_stream=None):
+        return NotImplemented

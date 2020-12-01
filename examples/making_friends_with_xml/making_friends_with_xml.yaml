@@ -1,0 +1,212 @@
+name: Making friends with XML
+driver: local
+cluster: http://localhost
+shard: http://localhost
+workflow:
+  - demo:
+      executor: UnixPipeExecutor
+  - create:
+      executor: StepExecutor
+      retry: true
+  - pre:
+      executor: StepExecutor
+      enabled: true
+  - clean:
+      executor: StepExecutor
+  - input:
+      executor: UnixPipeExecutor
+      enabled: true
+  - transform:
+      executor: StepExecutor
+      enabled: true
+  - transform_with_extract_all_groups:
+      executor: StepExecutor
+pre:
+  - TRUNCATE TABLE tmp.vll_epipe_services_raw
+clean:
+  - DROP TABLE IF EXISTS tmp.vll_epipe_services_raw
+  - DROP TABLE IF EXISTS test.vll_epipe_services
+  - tasks.file.delete: VLLEpipeService.xml.gz
+input:
+  - io.file.read: VLLEpipeService.xml.gz
+  - pipes.unpack.unpack
+  - pipes.text.replace:
+      search: <VLLEpipeServiceRecord>
+  - io.clickhouse.write:
+      format: formats.clickhouse.LineAsString
+      table: tmp.vll_epipe_services_raw
+      max_insert_threads: 16
+      max_threads: 16
+      max_insert_block_size: 10000
+transform_with_extract_all_groups:
+  - TRUNCATE TABLE test.vll_epipe_services
+  - tasks.clickhouse.execute:
+      max_insert_threads: 16
+      max_threads: 16
+      max_insert_block_size: 10000
+      run: |
+        INSERT INTO test.vll_epipe_services
+        WITH
+          extractAllGroupsHorizontal(raw_row, '<(\w+)>(.*?)</') AS row,
+          arraySort(
+            (x, y) -> 
+            transform(
+              y,
+              ['ServiceId', 'AutoAssignId', 'SVCMgrServiceId', 'DefaultVCId',
+              'InheritServiceIdValue', 'ServiceName', 'Description', 'ServiceTier',
+              'ServicePriority', 'AdministrativeState', 'AutomaticSDPBinding',
+              'PBBTunnelCreation', 'Tag', 'policerId', 'lagInterfaceNumber', 
+              'vlanEncap', 'direction'],
+              [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], 18),
+            row.2,
+            row.1
+          ) AS sorted
+        SELECT
+          toUInt64OrZero(sorted[1]) AS ServiceId,
+          toUInt8OrZero(sorted[2]) AS AutoAssignId,
+          toUInt32OrZero(sorted[3]) AS SVCMgrServiceId,
+          toUInt16OrZero(sorted[4]) AS DefaultVCId,
+          sorted[5] AS InheritServiceIdValue,
+          sorted[6] AS ServiceName,
+          sorted[7] AS Description,
+          sorted[8] AS ServiceTier,
+          sorted[9] AS ServicePriority,
+          sorted[10] AS AdministrativeState,
+          sorted[11] AS AutomaticSDPBinding,
+          sorted[12] AS PBBTunnelCreation,
+          sorted[13] AS Tag,
+          toUInt8OrZero(sorted[14]) AS policerId,
+          toUInt8OrZero(sorted[15]) AS lagInterfaceNumber,
+          sorted[16] AS vlanEncap,
+          sorted[17] AS direction
+        FROM tmp.vll_epipe_services_raw
+        WHERE ServiceId != 0
+  - TRUNCATE TABLE tmp.vll_epipe_services_raw
+transform:
+  - TRUNCATE TABLE test.vll_epipe_services
+  - tasks.clickhouse.execute:
+      max_insert_threads: 16
+      max_threads: 16
+      max_insert_block_size: 10000
+      run: |
+        INSERT INTO test.vll_epipe_services
+        WITH
+          arrayMap(
+            x -> 
+                (trim(LEADING '<' FROM v[-2]), (splitByString('>', x) AS v)[-1]),
+            splitByString('</', raw_row)
+          ) AS row,
+          arraySort(
+            (x, y) -> 
+            transform(
+              y,
+              ['ServiceId', 'AutoAssignId', 'SVCMgrServiceId', 'DefaultVCId',
+              'InheritServiceIdValue', 'ServiceName', 'Description', 'ServiceTier',
+              'ServicePriority', 'AdministrativeState', 'AutomaticSDPBinding',
+              'PBBTunnelCreation', 'Tag', 'policerId', 'lagInterfaceNumber', 
+              'vlanEncap', 'direction'],
+              [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], 18),
+            row.2,
+            row.1
+          ) AS sorted
+        SELECT
+          toUInt64OrZero(sorted[1]) AS ServiceId,
+          toUInt8OrZero(sorted[2]) AS AutoAssignId,
+          toUInt32OrZero(sorted[3]) AS SVCMgrServiceId,
+          toUInt16OrZero(sorted[4]) AS DefaultVCId,
+          sorted[5] AS InheritServiceIdValue,
+          sorted[6] AS ServiceName,
+          sorted[7] AS Description,
+          sorted[8] AS ServiceTier,
+          sorted[9] AS ServicePriority,
+          sorted[10] AS AdministrativeState,
+          sorted[11] AS AutomaticSDPBinding,
+          sorted[12] AS PBBTunnelCreation,
+          sorted[13] AS Tag,
+          toUInt8OrZero(sorted[14]) AS policerId,
+          toUInt8OrZero(sorted[15]) AS lagInterfaceNumber,
+          sorted[16] AS vlanEncap,
+          sorted[17] AS direction
+        FROM tmp.vll_epipe_services_raw
+        WHERE ServiceId != 0
+  - TRUNCATE TABLE tmp.vll_epipe_services_raw
+create:
+  - CREATE DATABASE IF NOT EXISTS tmp
+  - CREATE DATABASE IF NOT EXISTS test
+  - CREATE TABLE IF NOT EXISTS tmp.vll_epipe_services_raw
+    (
+      raw_row String
+    )
+    ENGINE = MergeTree
+    ORDER BY tuple()
+  - |
+    CREATE TABLE IF NOT EXISTS test.vll_epipe_services
+    (
+      ServiceId UInt64,
+      AutoAssignId UInt8,
+      SVCMgrServiceId UInt32,
+      DefaultVCId UInt16,
+      InheritServiceIdValue String,
+      ServiceName String,
+      Description String,
+      ServiceTier String,
+      ServicePriority String,
+      AdministrativeState Enum('up' = 1,'down' = 2),
+      AutomaticSDPBinding Enum('enabled' = 1,'disabled' = 2),
+      PBBTunnelCreation Enum('true' = 1,'false' = 2),
+      Tag String,
+      policerId UInt8,
+      lagInterfaceNumber UInt8,
+      vlanEncap String,
+      direction Enum('up' = 1,'down' = 2)
+    )
+    ENGINE = MergeTree 
+    ORDER BY tuple()
+demo:
+  - |
+    SELECT
+        format('<ServiceId>{}</ServiceId>', toString(ServiceId)),
+        format('<AutoAssignId>{}</AutoAssignId>', toString(AutoAssignId)),
+        format('<SVCMgrServiceId>{}</SVCMgrServiceId>', toString(SVCMgrServiceId)),
+        format('<DefaultVCId>{}</DefaultVCId>', toString(DefaultVCId)),
+        format('<InheritServiceIdValue>{}</InheritServiceIdValue>', replaceRegexpAll(InheritServiceIdValue, '[^A-Za-z0-9 ]', '')),
+        format('<ServiceName>SVC{}</ServiceName>', toString(ServiceName)),
+        format('<Description>{}</Description>', replaceRegexpAll(Description, '[^A-Za-z0-9 ]', '')),
+        format('<ServiceTier>tier-{}</ServiceTier>', toString(ServiceTier)),
+        format('<ServicePriority>priority-{}</ServicePriority>', toString(ServicePriority)),
+        format('<AdministrativeState>{}</AdministrativeState>', toString(AdministrativeState)),
+        format('<AutomaticSDPBinding>{}</AutomaticSDPBinding>', toString(AutomaticSDPBinding)),
+        format('<PBBTunnelCreation>{}</PBBTunnelCreation>', toString(PBBTunnelCreation)),
+        format('<Tag>{}</Tag>', replaceRegexpAll(Tag, '[^A-Za-z0-9 ]', '')),
+        format('<policerId>{}</policerId>', toString(policerId)),
+        format('<lagInterfaceNumber>{}</lagInterfaceNumber>', toString(lagInterfaceNumber)),
+        format('<vlanEncap>vlan-{}:{}</vlanEncap>', toString(vlanEncap.1), toString(vlanEncap.2)),
+        format('<direction>{}</direction>', toString(direction))
+    FROM generateRandom('
+        ServiceId UInt64,
+        AutoAssignId UInt8,
+        SVCMgrServiceId UInt32,
+        DefaultVCId UInt16,
+        InheritServiceIdValue String,
+        ServiceName UInt32,
+        Description String,
+        ServiceTier UInt8,
+        ServicePriority UInt8,
+        AdministrativeState Enum(\'up\' = 1,\'down\' = 2),
+        AutomaticSDPBinding Enum(\'enabled\' = 1,\'disabled\' = 2),
+        PBBTunnelCreation Enum(\'true\' = 1,\'false\' = 2),
+        Tag String,
+        policerId UInt8,
+        lagInterfaceNumber UInt8,
+        vlanEncap Tuple(UInt8, UInt8),
+        direction Enum(\'up\' = 1,\'down\' = 2)', 1, 30, 30)
+    LIMIT 2000000
+    FORMAT CustomSeparated
+    SETTINGS
+        format_custom_result_before_delimiter = '<?xml version=\"1.0\"?><VLLEpipeService>',
+        format_custom_result_after_delimiter = '</VLLEpipeService>',
+        format_custom_row_before_delimiter = '<VLLEpipeServiceRecord>',
+        format_custom_row_after_delimiter = '</VLLEpipeServiceRecord>',
+        format_custom_field_delimiter = ''
+  - pipes.pack.pack
+  - io.file.write: VLLEpipeService.xml.gz

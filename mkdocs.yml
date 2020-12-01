@@ -1,0 +1,81 @@
+site_name: VulknData Eruptr
+theme:
+  name: material
+  features:
+    #- navigation.instant
+    - navigation.tabs
+  palette:
+    primary: deep purple
+    accent: deep purple
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.arithmatex
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist
+  - pymdownx.tilde
+extra_css:
+  - css/extra.css
+
+nav:
+  - Home:
+    - VulknData Eruptr: index.md
+    - Installation: home/installation.md
+    - Getting Started: home/getting-started.md
+    - Working with YAML: home/yaml-configuration.md
+    - Minimal vs Standard blocks: home/minimal-vs-standard-blocks.md
+    - Handlers: home/handlers.md
+    - Templating: home/templating.md
+    - Commands: home/commands.md
+    - Executors: home/executors.md
+    - Examples: home/examples.md
+    - License: home/license.md
+  - Concepts:
+    - Engines: concepts/engines.md
+    - Formats: concepts/formats.md
+    - Generators: concepts/generators.md
+    - I/O: concepts/io.md
+    - Locks: concepts/locks.md
+    - Pipes: concepts/pipes.md
+    - Tasks: concepts/tasks.md
+  - Commands:
+    - Data Ingestion: commands/load-index.md
+    - Data Ingestion YAML Reference: commands/load-reference.md
+    - Format Conversion: commands/convert-index.md
+  - Module Reference:
+    - utils: reference/utils.md
+    - engines.clickhouse: reference/engines-clickhouse.md
+    - formats.clickhouse: reference/formats-clickhouse.md
+    - generators.clickhouse:  reference/generators-clickhouse.md
+    - generators.file: reference/generators-file.md
+    - generators.s3: reference/generators-s3.md
+    - io.clickhouse: reference/io-clickhouse.md
+    - io.file: reference/io-file.md
+    - io.http: reference/io-http.md
+    - io.s3: reference/io-s3.md
+    - locks.filesystem: reference/locks-filesystem.md
+    - pipes.clickhouse: reference/pipes-clickhouse.md
+    - pipes.cmd: reference/pipes-cmd.md
+    - pipes.pack: reference/pipes-pack.md
+    - pipes.python: reference/pipes-python.md
+    - pipes.text:  reference/pipes-text.md
+    - pipes.unpack: reference/pipes-unpack.md
+    - pipes.utils: reference/pipes-utils.md
+    - pipes.xml: reference/pipes-xml.md
+    - tasks.clickhouse: reference/tasks-clickhouse.md
+    - tasks.cmd: reference/tasks-cmd.md
+    - tasks.file: reference/tasks-file.md
+    - tasks.pack: reference/tasks-pack.md
+    - tasks.python: reference/tasks-python.md
+    - tasks.s3: reference/tasks-s3.md
+    - tasks.unpack: reference/tasks-unpack.md

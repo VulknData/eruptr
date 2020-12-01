@@ -1,0 +1,68 @@
+name: Simple Batch Job
+shard: clickhouse://localhost/test
+workflow:
+  - drop:
+      executor: StepExecutor
+      enabled: false
+      max_tasks: 1
+  - create:
+      executor: StepExecutor
+      enabled: false
+      max_tasks: 1
+  - data:
+      executor: StepExecutor
+      enabled: false
+      max_tasks: 1
+  - pre:
+      executor: StepExecutor
+      enabled: true
+      max_tasks: 1
+  - input:
+      executor: UnixPipeExecutor
+      enabled: true
+      max_tasks: 1
+  - transform:
+      executor: StepExecutor
+      enabled: true
+      max_tasks: 1
+data:
+  - tasks.clickhouse.export:
+      run: SELECT * FROM test.zabbix_data
+      output_format: formats.clickhouse.CSV
+      path: /tmp/baz
+      overwrite: True
+  - tasks.file.write:
+      path: ../tests/zabbix_data_test.csv
+      data: |
+        "device1","1970-04-27 03:46:40",32.3,"temperature","file","zabbix_data.csv.gz","2020-10-30 22:23:08"
+        "device1","1970-04-27 03:46:40",10.2,"watts","file","zabbix_data.csv.gz","2020-10-30 22:23:08"
+  - tasks.pack.gz:
+      input_file: ../tests/zabbix_data_test.csv
+      output_file: ../tests/zabbix_data_test.csv.gz
+pre:
+  - tasks.clickhouse.import_file:
+      table: test.zabbix_data_2
+      input_format: formats.clickhouse.CSV
+      path: /tmp/baz
+input:
+  - io.file.read: ../tests/zabbix_data_test.csv.gz
+  - pipes.unpack.gz
+  - io.clickhouse.write:
+      table: test.zabbix_data_2
+      format: formats.clickhouse.CSV
+transform:
+  - tasks.file.delete: ../tests/zabbix_data_test.csv.gz
+create:
+  - |
+    CREATE TABLE IF NOT EXISTS test.zabbix_data_2
+    (
+      device String,
+      epoch_dt DateTime,
+      value Float32,
+      tag String,
+      source String,
+      source_name String,
+      dt_created DateTime
+    ) ENGINE = Log
+drop:
+  - DROP TABLE IF EXISTS test.zabbix_data_2

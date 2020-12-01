@@ -1,0 +1,52 @@
+name: Simple1 Batch Job
+shard: clickhouse://localhost/test
+workflow:
+  - drop:
+      executor: StepExecutor
+  - create:
+      executor: StepExecutor
+      enabled: true
+  - data:
+      executor: StepExecutor
+  - pre:
+      executor: StepExecutor
+      enabled: true
+  - input:
+      executor: UnixPipeExecutor
+      enabled: true
+  - post:
+      executor: StepExecutor
+  - clean:
+      executor: StepExecutor
+data:
+  - tasks.file.write:
+      path: system_metrics.csv
+      data: |
+        "device1","1970-04-27 03:46:40",32.3,"temperature"
+        "device1","1970-04-27 03:46:40",10.2,"watts"
+  - tasks.pack.gz:
+      input_file: system_metrics.csv
+      output_file: system_metrics.csv.gz
+pre:
+  - TRUNCATE TABLE simple1.system_metrics
+input:
+  - io.file.read: system_metrics.csv.gz
+  - pipes.unpack.gz
+  - io.clickhouse.write:
+      table: simple1.system_metrics
+      format: formats.clickhouse.CSV
+post:
+  - tasks.file.delete: system_metrics.csv.gz
+create:
+  - CREATE DATABASE IF NOT EXISTS simple1
+  - |
+    CREATE TABLE IF NOT EXISTS simple1.system_metrics
+    (
+      device String,
+      epoch_dt DateTime,
+      value Float32,
+      tag String
+    ) ENGINE = Log
+clean:
+  - DROP TABLE IF EXISTS simple1.system_metrics
+  - DROP DATABASE IF EXISTS simple1

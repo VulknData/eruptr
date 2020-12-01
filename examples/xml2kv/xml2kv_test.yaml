@@ -1,0 +1,86 @@
+name: xml2kv Test
+shard: clickhouse://localhost/test
+workflow:
+  - create:
+      executor: StepExecutor
+      enabled: true
+  - data:
+      executor: StepExecutor
+  - input:
+      executor: UnixPipeExecutor
+      enabled: true
+create:
+  - CREATE DATABASE IF NOT EXISTS xml2kv
+  - |
+    CREATE TABLE IF NOT EXISTS xml2kv.xml2kv_test
+    (
+      `key1` String,
+      `attr1` String,
+      `dimension1` String,
+      `dimension2` String,
+      `dimension3` String,
+      `value1` Nullable(UInt16),
+      `value2` Nullable(Float32),
+      `value3` Nullable(Float32),
+      `value4` Nullable(UInt16)
+    )
+    ENGINE = Log
+data:
+  - tasks.file.write:
+      path: xml2kv_test.xml
+      data: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        <MyRecordSet>
+        <MyRecord>
+            <key1>device-1</key1>
+            <dimension1 attr1='foo'>some-dimension</dimension1>
+            <dimension2>some-dimension-2</dimension2>
+            <dimension3>some-dimension-3</dimension3>
+            <value1>10</value1>
+            <value2>11.3</value2>
+            <value3>0.34</value3>
+            <value4>4</value4>
+        </MyRecord>
+        <MyRecord>
+            <key1>device-2</key1>
+            <dimension1 attr1='bar'>some-dimension-dev2</dimension1>
+            <dimension2>some-dimension-2</dimension2>
+            <dimension3>some-dimension-3</dimension3>
+            <value1>14</value1>
+            <value2>15.2</value2>
+            <value3>0.28</value3>
+            <value4>1</value4>
+        </MyRecord>
+        </MyRecordSet>
+  - tasks.pack.gz:
+      input_file: xml2kv_test.xml
+{%
+  set cols = ['key1|toString', 'attr1|toString', 'dimension1|toString',
+              'dimension2|toString', 'dimension3|toString',
+              'value1|toUInt16OrNull', 'value2|toFloat32OrNull',
+              'value3|toFloat32OrNull', 'value4|toUInt16OrNull']
+%}
+{% set comma = joiner(",") %}
+input:
+  - io.file.read: xml2kv_test.xml.gz
+  - pipes.unpack.gz
+  - pipes.xml.xml2kv
+  - io.clickhouse.write:
+      run: |
+          WITH
+            extractAllGroupsVertical(
+              arrayJoin(splitByString('/MyRecordSet/MyRecord\n', data)),
+              '/@?(\\w+)=(.*?)\n'
+            ) AS row
+          SELECT
+            {% for colspec in cols %} {{ comma() }}
+            {{ colspec.split('|')[1] }}(
+              arrayFilter(
+                x -> x[1] == '{{ colspec.split('|')[0] }}', 
+                row
+              )[1][2]
+            ) AS {{ colspec.split('|')[0] }}
+            {% endfor %}
+          FROM input('data String')
+      table: xml2kv.xml2kv_test
+      format: formats.clickhouse.RawBLOB

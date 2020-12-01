@@ -1,0 +1,14 @@
+# formats.clickhouse
+
+## formats.clickhouse.*
+
+Formats are automatically discovered via the clickhouse-local command installed
+on the system running eruptr. The format objects have the following attributes:
+
+* `format: str` - the format string/name (for instance - `ArrowStream`)
+* `is_input: bool` - boolean value that indicates if the format is valid for input
+* `is_output: bool` - boolean value that indicates if the format is valid for output
+
+Example modules (depending on the version):
+
+`formats.clickhouse.Arrow`, `formats.clickhouse.ArrowStream`, `formats.clickhouse.Avro`, `formats.clickhouse.AvroConfluent`, `formats.clickhouse.CSV`, `formats.clickhouse.CSVWithNames`, `formats.clickhouse.CapnProto`, `formats.clickhouse.CustomSeparated`, `formats.clickhouse.CustomSeparatedIgnoreSpaces`, `formats.clickhouse.JSON`, `formats.clickhouse.JSONAsString`, `formats.clickhouse.JSONCompact`, `formats.clickhouse.JSONCompactEachRow`, `formats.clickhouse.JSONCompactEachRowWithNamesAndTypes`, `formats.clickhouse.JSONCompactStrings`, `formats.clickhouse.JSONCompactStringsEachRow`, `formats.clickhouse.JSONCompactStringsEachRowWithNamesAndTypes`, `formats.clickhouse.JSONEachRow`, `formats.clickhouse.JSONEachRowWithProgress`, `formats.clickhouse.JSONStrings`, `formats.clickhouse.JSONStringsEachRow`, `formats.clickhouse.JSONStringsEachRowWithProgress`, `formats.clickhouse.LineAsString`, `formats.clickhouse.Markdown`, `formats.clickhouse.MsgPack`, `formats.clickhouse.MySQLWire`, `formats.clickhouse.Native`, `formats.clickhouse.Null`, `formats.clickhouse.ODBCDriver2`, `formats.clickhouse.ORC`, `formats.clickhouse.Parquet`, `formats.clickhouse.PostgreSQLWire`, `formats.clickhouse.Pretty`, `formats.clickhouse.PrettyCompact`, `formats.clickhouse.PrettyCompactMonoBlock`, `formats.clickhouse.PrettyCompactNoEscapes`, `formats.clickhouse.PrettyNoEscapes`, `formats.clickhouse.PrettySpace`, `formats.clickhouse.PrettySpaceNoEscapes`, `formats.clickhouse.Protobuf`, `formats.clickhouse.ProtobufSingle`, `formats.clickhouse.RawBLOB`, `formats.clickhouse.Regexp`, `formats.clickhouse.RowBinary`, `formats.clickhouse.RowBinaryWithNamesAndTypes`, `formats.clickhouse.TSKV`, `formats.clickhouse.TSV`, `formats.clickhouse.TSVRaw`, `formats.clickhouse.TSVWithNames`, `formats.clickhouse.TSVWithNamesAndTypes`, `formats.clickhouse.TabSeparated`, `formats.clickhouse.TabSeparatedRaw`, `formats.clickhouse.TabSeparatedWithNames`, `formats.clickhouse.TabSeparatedWithNamesAndTypes`, `formats.clickhouse.Template`, `formats.clickhouse.TemplateIgnoreSpaces`, `formats.clickhouse.Values`, `formats.clickhouse.Vertical`, `formats.clickhouse.XML`
