@@ -48,8 +48,8 @@ transform:
         run: SELECT * FROM mydatabase.mytable_idx FORMAT CSV
         filename: /tmp/mytable_dump.csv
     - tasks.pack.gz:
-        input: /tmp/mytable_dump.csv
-        output: //some/nfs/share/mytable_dump.csv.gz
+        input_file: /tmp/mytable_dump.csv
+        output_file: //some/nfs/share/mytable_dump.csv.gz
     - tasks.s3.put:
         bucket: s3://daily-dumps
         source: //some/nfs/share/mytable_dump.csv.gz

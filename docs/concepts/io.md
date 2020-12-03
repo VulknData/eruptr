@@ -14,8 +14,7 @@ defaults:
     params:
         connection: clickhouse://user:pass@hostname:9000/mydatabase
 input:
-    - io.file.read:
-        filename: myfile.csv
+    - io.file.read: myfile.csv
     - pipes.utils.duplicate:
         - io.clickhouse.write:
             table: mydatabase.table

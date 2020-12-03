@@ -29,7 +29,7 @@ logging.addLevelName(LogLevels.SQL, 'SQL')
 
 
 def main():
-    sys.stderr.write('VulknData Eruptr (C) 2020 VulknData, Jason Godden\n\n')
+    sys.stderr.write('VulknData Eruptr (C) 2020 VulknData\n\n')
     sys.stderr.write('GPLv3 - see https://github.com/VulknData/eruptr/COPYING\n\n')
     eruptr.config.__opts__ = eruptr.args.parse_args()
     __opts__ = eruptr.config.__opts__

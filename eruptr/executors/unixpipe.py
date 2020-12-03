@@ -83,7 +83,7 @@ def build_dag_task(process, **kwargs):
         elif process.strip().lower().startswith('insert'):
             proc = __eruptr__[__handlers__['io_sql_write']]
         else:
-            proc = __eruptr__[__handlers__['streams_command']]
+            proc = __eruptr__[__handlers__['pipes_command']]
         stages.append((proc, task_args))
     else:
         module = list(process.keys())[0]
