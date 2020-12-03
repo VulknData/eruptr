@@ -52,7 +52,7 @@ __opts__ = None
 
 workflow = [
     {'drop': {'executor': 'StepExecutor', 'enabled': False, 'max_tasks': 1}},
-    {'create': {'executor': 'StepExecutor', 'enabled': False, 'max_tasks': 1}},
+    {'create': {'executor': 'StepExecutor', 'enabled': False, 'retry': True, 'max_tasks': 1}},
     {'distributed': {'executor': 'StepExecutor', 'enabled': False, 'max_tasks': 1}},
     {'reset': {'executor': 'StepExecutor', 'enabled': False, 'max_tasks': 1}},
     {'pre': {'executor': 'StepExecutor', 'enabled': True, 'max_tasks': 1}},
@@ -89,6 +89,16 @@ def render_templates(config_file, opts, variables, cfg={}):
         raise EruptrConfigException(
             'Could not render configuration. Is the file empty?'
         )
+    if ret.get('include'):
+        for f in ret['include']:
+            inc = render_templates(
+                f'{os.path.dirname(os.path.abspath(config_file))}/{f}',
+                opts,
+                variables,
+                cfg=cfg
+            )
+            inc.update(ret)
+            ret = inc
     if ret.get('defaults'):
         if ret['defaults'].get('handlers'):
             __handlers__.update(ret['defaults']['handlers'])
