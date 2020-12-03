@@ -3,7 +3,7 @@
 ## Example
 
 Eruptr uses YAML for it's configuration files. A sample configuration for batch
-processing can be seen below.
+processing using minimal block format can be seen below.
 
 ```yaml
 name: Zabbix Data

@@ -53,8 +53,8 @@ insert:
     - INSERT INTO mydatabase.`{{ vars.filename }}` ..
 ```
 
-Test mode with log-level DEBUG can be used to view the rendered configuration
-without executing any ETL processes.
+Test mode with log-level DEBUG or Render mode can be used to view the rendered
+configuration without executing any ETL processes.
 
 ```yaml
 11/08/2020 09:38:22 PM - DEBUG - Rendered config:
@@ -62,12 +62,12 @@ name: Zabbix Data
 defaults:
     handlers:
         locks: locks.filesystem
-        input_sql_insert: io.clickhouse.write
-        input_sql_stream: pipes.clickhouse.local
-        input_io_stream: pipes.shell.pipeline
-        transform_sql_query: tasks.clickhouse.execute
-        transform_sql_select: tasks.clickhouse.select
-        transform_shell: tasks.shell.run
+        io_sql_write: io.clickhouse.write
+        pipes_sql_transform: pipes.clickhouse.local
+        pipes_command: pipes.cmd.shell
+        task_sql_execute: tasks.clickhouse.execute
+        task_sql_select: tasks.clickhouse.select
+        task_command: tasks.cmd.shell
         evaluator: tasks.clickhouse.local
     params:
         connection: http://localhost/test
@@ -79,7 +79,7 @@ locks:
 vars:
     dt: '2020-11-08 21:38:22'
 input:
--   pipes.shell.cmd:
+-   pipes.cmd.cmd:
         run:
         - pigz -d
         - grep '.*,.*,.*,.*'

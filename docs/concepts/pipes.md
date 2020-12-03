@@ -43,13 +43,10 @@ And an Eruptr input YAML spec may look something like:
 
 ```yaml
 input:
-    - io.file.read:
-        filename: myfile.csv.gz
+    - io.file.read: myfile.csv.gz
     - pipes.unpack.gz
-    - pipes.text.sed:
-        run: s/\t/,/g
-    - pipes.text.striplines:
-        head: 1
+    - pipes.text.sed: s/\t/,/g
+    - pipes.text.tail: +2
     - io.clickhouse.write:
         table: mydatabase.myfile
         format: formats.clickhouse.CSV
@@ -85,17 +82,15 @@ generators:
                 filename: s3://error/@@ context.tags.poll.filename @@
                 to: s3://archive/@@ context.tags.poll.filename @@
 input:
-    - io.s3.read:
-        filename: @@ context.tags.poll.filename @@
+    - io.s3.read: @@ context.tags.poll.filename @@
     - pipes.unpack.gz
     - pipes.text.replace:
-        find: "\t"
-        replace: ","
-    - pipes.text.striplines:
-        head: 1
+        search: \t
+        replace: ,
+    - pipes.text.tail: +2
     - pipes.utils.duplicate:
         to-s3-as-parquet:
-            - pipes.clickhouse.convert:
+            - pipes.clickhouse.local:
                 columns:
                     - id String
                     - tag String
@@ -110,7 +105,7 @@ input:
                     @@ context.tags.poll.filename |
                         replace(".csv.gz", ".parquet.gz") @@.parquet.gz
         to-clickhouse:
-            - io.clickhouse.write:
+            - io.clickhouse.local:
                 table: mydatabase.mytable
                 format: formats.clickhouse.CSV
 ```

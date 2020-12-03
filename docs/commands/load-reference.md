@@ -16,8 +16,8 @@ for use throughout the configuration.
 ```yaml
 defaults:
     handlers:
-        sql_stream_insert: streams.clickhouse.cli_insert
-        evaluator: engines.clickhouse.evaluate
+        io_sql_write: io.clickhouse.write
+        evaluator: tasks.clickhouse.local
     params:
         connection: clickhouse://user:password@host.name.com:9000/testdatabase
 ```
@@ -84,7 +84,16 @@ input:
 
 Defines the flows and execution/scheduling methods used for each flow in a list.
 The order of the flows is important as eruptr will process the flows sequentially.
-This allows you define composable pipelines.
+This allows you define composable pipelines using different executors.
+
+Each flow may also be marked as enabled (`enabled`) - the default is not to run 
+the flow. This will automatically run the flow when the configuration is called
+without any parameters. 
+
+Flows can also be enabled automatically on retry. If a task fails Eruptr will
+retry the flow with any flows marked `retry`. In the flow example, if the 
+execution fails, the flow will be retried with the 'create' flow enabled. This 
+can come in handy if you want eruptr to automatically deploy your database objects.
 
 ```yaml
 workflow:
@@ -92,12 +101,13 @@ workflow:
         executor: StepExecutor
     - create:
         executor: StepExecutor
+        retry: true
     - input:
         executor: UnixPipeExecutor
-        enable: true
+        enabled: true
     - transform:
         executor: StepExecutor
-        enable: true
+        enabled: true
     - clean:
         executor: StepExecutor
 ```
@@ -107,7 +117,7 @@ The format for a flow definition is:
 ```yaml
     - flow:
         executor: StepExecutor|UnixPipeExecutor
-        enable: true|false (default false)
+        enabled: true|false (default false)
         retry: true|false (default false)
 ```
 

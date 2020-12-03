@@ -11,10 +11,12 @@ A standard block to execute a streaming shell command might look as follows:
 
 ```yaml
 input:
-    - pipes.shell.cmd:
-        run: zcat {{ opts.name }}
+    - io.file.read:
+        run: {{ opts.name }}
+    - pipes.cmd.cmd:
+        run: zcat
     # Simple key:value representation below is also valid.
-    - pipes.shell.cmd: grep -v '^ABC'
+    - pipes.cmd.cmd: grep -v '^ABC'
     - io.clickhouse.write:
         table: mydatabase.mydata
         format: formats.clickhouse.CSV
@@ -25,7 +27,8 @@ Each block is executed in order. Within the input section example above this wil
 be executed by the stream executor as:
 
 ```bash
-zcat <inputfilename> | \
+cat <inputfilename> | \
+zcat | \
 grep -v '^ABC' | \
 clickhouse-client \
     --host myhost \
@@ -40,9 +43,10 @@ This could also be specified as a single block by providing a list to the `run` 
 
 ```yaml
 input:
-    - pipes.shell.cmd:
+    - io.file.read: {{ opts.name }}
+    - pipes.cmd.cmd:
         run:
-          - zcat {{ opts.name }}
+          - zcat
           - grep -v '^ABC'
     - io.clickhouse.write:
         table: mydatabase.mydata
@@ -50,12 +54,13 @@ input:
         connection: clickhouse://user:password@myhost:9000/mydatabase
 ```
 
-In the example above the `pipes.shell.cmd` module only accepts single shell 
-commands. The `pipes.shell.pipeline` module could be used instead:
+In the example above the `pipes.cmd.cmd` function only accepts single shell 
+commands. The `pipes.cmd.shell` module could be used instead:
 
 ```yaml
 input:
-    - pipes.shell.pipeline: zcat {{ opts.name }} | grep -v '^ABC'
+    - io.file.read: {{ opts.name }}
+    - pipes.cmd.shell: zcat | grep -v '^ABC'
     - io.clickhouse.write:
         table: mydatabase.mydata
         format: formats.clickhouse.CSV
@@ -65,8 +70,9 @@ input:
 Minimal blocks on the other hand are simple strings comprised of the `run` 
 parameter only and don't include any additional parameters. Eruptr will use 
 the default handler and some internal logic to determine the type of command 
-to execute. The following will automatically use the `input_io_stream` 
-handler (default `pipes.shell.pipeline`) and the `input_sql_insert` handler.
+to execute. The following will automatically use the `pipes_command` 
+handler (default `pipes.cmd.shell`) and the `io_sql_write` handler (default 
+`io.clickhouse.write`).
 
 ```yaml
 defaults:
@@ -90,9 +96,9 @@ input:
     ...
 ```
 
-For the INSERT command the `pipes.clickhouse.insert` module will determine
+For the INSERT command the `io.clickhouse.write` module will determine
 the `table` and `format` from the query and the `connection` information
 from the default params clause.
 
 Eruptr will automatically determine whether it's evaluating a minimal or 
-standard block.
+standard block based on the type of object in the flow list.

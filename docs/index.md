@@ -25,14 +25,23 @@ Eruptr is a hybrid of all the aforementioned patterns - streaming, ELT and ETL m
 - Model deployment - describe target tables as part of the workflow and let Eruptr deploy them for you.
 - Data conversion - use eruptr to convert between multiple data formats from multiple source / object stores on the fly.
 - Extensible modular ecosystem. Users can author new modules - eruptr will automatically detect and load your modules:
+    - `drivers` - Execution targets to deploy your workloads
     - `engines` - Create new data store execution engines
+    - `executors` - High level process co-ordinators to mix batch and streaming 
+    modules
+    - `filters` - Jinja template filters that can be used throughout your 
+    workflows
+    - `formats` - Convert data sources without having to fire up Spark or employ 
+    complex layers of  Java/Scala code
     - `io` - Interact with different data store endpoints and streaming systems
-    - `formats` - Convert data sources without having to fire up Spark or employ complex layers of Java/Scala code
-    - `macros` - Declare both SQL snippets and functions as Jinja, Mako or simple SQL macros for re-use
-    - `tasks` - Execute batch-style tasks from shell, scripts, embedded code or SQL
-    - `pipes` - Simple Unix pipes streaming API - process text using gawk, awk, sed and other shell tools
-    - `executors` - High level process co-ordinators to mix batch and streaming modules
-    - `locks` - Employ file, database or distributed key/value store locking for rapid data applications and co-ordinating multiple data stores
+    - `locks` - Employ file, database or distributed key/value store locking for 
+    rapid data applications and co-ordinating multiple data stores
+    - `macros` - Declare both SQL snippets and functions as Jinja, Mako or 
+    simple SQL macros for re-use
+    - `pipes` - Simple Unix pipes streaming API - process text using gawk, awk, 
+    sed and other shell tools
+    - `tasks` - Execute batch-style tasks from shell, scripts, embedded code or 
+    SQL
 - ClickHouse only features
     - Streaming SQL transformations using the `pipes.clickhouse.local` and `io.clickhouse.write` functions
     - Shard allocation / detection for data files
