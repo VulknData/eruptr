@@ -22,7 +22,7 @@ __virtualname__ = 'pipes.text'
 
 @functools.lru_cache(maxsize=None)
 def __virtual__():
-    bins = ['gawk', 'awk', 'sed', 'grep']
+    bins = ['gawk', 'awk', 'sed', 'grep', 'head', 'tail']
     for binary in bins:
         if not eruptr.utils.path.which(binary):
             return(False, f'The {binary} binary could not be found')
@@ -36,6 +36,11 @@ def awk(run=None, env=None, __context__=None, **kwargs):
 
 def grep(run=None, env=None, __context__=None, **kwargs):
     proc = UnixPipeProcess(['grep', run], env=env)
+    return (proc, __context__)
+
+
+def head(run=None, env=None, __context__=None, **kwargs):
+    proc = UnixPipeProcess(['head', '-n{run}'], env=env)
     return (proc, __context__)
 
 
@@ -59,4 +64,9 @@ def replace(
 
 def sed(run=None, env=None, __context__=None, **kwargs):
     proc = UnixPipeProcess(['sed', run], env=env)
+    return (proc, __context__)
+
+
+def tail(run=None, env=None, __context__=None, **kwargs):
+    proc = UnixPipeProcess(['tail', '-n{run}'], env=env)
     return (proc, __context__)
