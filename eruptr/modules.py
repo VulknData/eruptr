@@ -13,7 +13,9 @@ import inspect
 import glob
 import subprocess
 import logging
+import yaml
 from importlib import util
+from pathlib import Path
 
 
 import eruptr.utils
@@ -34,16 +36,43 @@ __engines__ = {}
 __tasks__ = {}
 
 
-def load_modules():
+def resolve_modules(user_config=None):
+    if not user_config:
+        user_config = f'{str(Path.home())}/.eruptr.yaml'
+    settings = None
+    modules = {}
+    if os.path.isfile(user_config):
+        with open(user_config, 'r') as fd:
+            settings = yaml.load(fd, Loader=yaml.FullLoader)
+        if 'modules' in settings:
+            if isinstance(settings['modules'], str):
+                modules = dict(
+                    (m, [f"{settings['modules']}/{m}"]) for m in MODULES
+                )
+            elif isinstance(settings['modules'], dict):
+                for k, v in settings['modules'].items():
+                    if isinstance(v, list):
+                        modules[k] = v
+                    elif isinstance(v, str):
+                        modules[k] = [v]
+                    else:
+                        log.warning(f'Unable to load user module {k}')
+    for k in MODULES:
+        modules.setdefault(k, []).append(
+            f'{os.path.dirname(os.path.abspath(__file__))}/{k}'
+        )
+    return modules
+
+
+def load_modules(user_config=None):
     global MODULES, __eruptr__, __engines__, __tasks__
     mod_funcs = {}
     mod_libs = []
-    for module in MODULES:
-        mod_funcs[module], _mod_libs = _load_module_from_path(
-            module, os.path.dirname(os.path.abspath(__file__))
-        )
-        __eruptr__.update(mod_funcs[module])
-        mod_libs += _mod_libs
+    for module, paths in resolve_modules(user_config).items():
+        for path in paths:
+            mod_funcs[module], _mod_libs = _load_module_from_path(module, path)
+            __eruptr__.update(mod_funcs[module])
+            mod_libs += _mod_libs
     for k in sorted(list(mod_funcs.keys())):
         log.debug(
             f'Discovered library {k}: {sorted(list(mod_funcs[k].keys()))}')
@@ -68,7 +97,7 @@ def _load_module_from_path(ltype, basepath, use_module_name=False):
     if not os.path.exists(basepath):
         log.error(f'Base path {basepath} does not exist')
         return (mod_funcs, mod_libs)
-    mod_path = os.path.join(basepath, ltype)
+    mod_path = basepath
     if not os.path.exists(mod_path):
         log.error(f'Module path {mod_path} does not exist')
         return (mod_funcs, mod_libs)

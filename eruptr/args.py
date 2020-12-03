@@ -113,6 +113,15 @@ def parse_args():
         type=str,
         help='Optional. The log level (try INFO, WARNING, DEBUG etc..). (default WARNING)'
     )
+    base.add_argument(
+        '--user-config',
+        dest='user_config',
+        action='store',
+        metavar='USER_CONFIG',
+        default=None,
+        type=str,
+        help='Optional. The path to the user configuration file.'
+    )
     render_base = _build_render_base_subparser(subparsers, [base])
 
     #eruptr.commands.init.cli_args(subparsers, [base])

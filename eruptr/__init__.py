@@ -39,7 +39,7 @@ def main():
         eruptr.config.timing = __opts__.timing
 
     __eruptr__ = eruptr.modules.__eruptr__
-    eruptr.modules.load_modules()
+    eruptr.modules.load_modules(__opts__.user_config)
 
     if hasattr(__opts__, 'cls'):
         eruptr.config.__vars__ = SimpleNamespace()
