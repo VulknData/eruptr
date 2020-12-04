@@ -61,6 +61,7 @@ nav:
     - generators.file: reference/generators-file.md
     - generators.s3: reference/generators-s3.md
     - io.clickhouse: reference/io-clickhouse.md
+    - io.cmd: reference/io-cmd.md
     - io.file: reference/io-file.md
     - io.http: reference/io-http.md
     - io.s3: reference/io-s3.md
