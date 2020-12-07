@@ -102,7 +102,7 @@ def _create_stream_from_cmdline(cli_arg):
         func_args = {'run': None}
         if len(args[1:]) > 0:
             func_args = dict(a.split('=', 1) for a in args[1:])
-        stream_chain.append(__eruptr__[func](**func_args))
+        stream_chain.append({func: func_args})
     return stream_chain
 
 
@@ -121,15 +121,23 @@ class EruptrConvert(EruptrCommand):
         input_format = __eruptr__[self._input_format].format
         output_format = __eruptr__[self._output_format].format
         convert_stream = _create_stream_from_cmdline(self._input)
-        convert_stream.append(
-            __eruptr__['pipes.clickhouse.local'](
-                run=self._transform,
-                structure=self._input_schema,
-                input_format=input_format,
-                output_format=output_format
-            )
-        )
+        convert_stream.append({
+            'pipes.clickhouse.local': {
+                'run': self._transform,
+                'structure': self._input_schema,
+                'input_format': input_format,
+                'output_format': output_format
+            }
+        })
         convert_stream += _create_stream_from_cmdline(self._output)
-        e = UnixPipeExecutor(convert_stream)
+        e = UnixPipeExecutor('convert', convert_stream)
         e.execute()
         return 0
+
+"""
+./eruptr convert --log-level DEBUG \
+--input io.file.read:run=../examples/convert/hr_data.tskv \
+--input-schema 'department String, title String, wage UInt32' \
+--input-format formats.clickhouse.TSKV \
+--output-format formats.clickhouse.CSV
+"""

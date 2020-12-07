@@ -19,6 +19,7 @@ from pathlib import Path
 
 
 import eruptr.utils
+from eruptr.context import ContextManager
 
 
 log = logging.getLogger()
@@ -34,6 +35,7 @@ __eruptr__ = {
 
 __engines__ = {}
 __tasks__ = {}
+__context__ = ContextManager()
 
 
 def resolve_modules(user_config=None):
@@ -86,6 +88,7 @@ def load_modules(user_config=None):
         module.__eruptr__ = __eruptr__
         module.__engines__ = __engines__
         module.__tasks__ = __tasks__
+        module.__context__ = __context__
 
 
 def _load_module_from_path(ltype, basepath, use_module_name=False):

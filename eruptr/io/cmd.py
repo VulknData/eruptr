@@ -23,7 +23,7 @@ __virtualname__ = 'io.cmd'
 
 @functools.lru_cache(maxsize=None)
 def __virtual__():
-    bins = ['gawk', 'sed']
+    bins = ['sh']
     for binary in bins:
         if not eruptr.utils.path.which(binary):
             return(False, f'The {binary} binary could not be found')
@@ -34,18 +34,16 @@ def cmd(
     run=None,
     mode='read',
     env=None,
-    __context__=None,
     **kwargs
 ):
     if mode not in ('read', 'write'):
         raise Exception('Unknown input/output mode specified.')
-    proc = UnixPipeProcess(
+    return UnixPipeProcess(
         shlex.split(run),
         env=env,
         stdin=subprocess.PIPE if mode == 'write' else None,
         stdout=subprocess.PIPE if mode == 'read' else None
     )
-    return (proc, __context__)
 
 
 def shell(
@@ -53,18 +51,16 @@ def shell(
     mode='read',
     shell='/bin/sh',
     env=None,
-    __context__=None,
     **kwargs
 ):
     if mode not in ('read', 'write'):
         raise Exception('Unknown input/output mode specified.')
-    proc = UnixPipeProcess(
+    return UnixPipeProcess(
         [shell, '-c', run],
         env=env,
         stdin=subprocess.PIPE if mode == 'write' else None,
         stdout=subprocess.PIPE if mode == 'read' else None
     )
-    return (proc, __context__)
 
 
 def script(
@@ -72,18 +68,16 @@ def script(
     mode='read',
     shell='/bin/sh',
     env=None,
-    __context__=None,
     **kwargs
 ):
     if mode not in ('read', 'write'):
         raise Exception('Unknown input/output mode specified.')
-    proc = UnixPipeProcess(
+    return UnixPipeProcess(
         [shell, '-c', run],
         env=env,
         stdin=subprocess.PIPE if mode == 'write' else None,
         stdout=subprocess.PIPE if mode == 'read' else None
     )
-    return (proc, __context__)
 
 
 readcmd = cmd

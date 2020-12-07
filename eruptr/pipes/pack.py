@@ -39,13 +39,12 @@ _MAPPINGS = {
 }
 
 
-def pack(run=None, flags=None, env=None, __context__=None, **kwargs):
+def pack(run=None, flags=None, env=None, **kwargs):
     method = _MAPPINGS[run or 'gz'][0]
     cmd = [method]
     if flags:
         cmd += flags
-    proc = UnixPipeProcess(cmd, env=env)
-    return (proc, __context__)
+    return UnixPipeProcess(cmd, env=env)
 
 
 gz = lambda run, **kwargs: pack(run='gz', **kwargs)

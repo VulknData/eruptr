@@ -29,22 +29,18 @@ def __virtual__():
     return __virtualname__
 
 
-def read(run=None, env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess(['cat', run], env=env, stdin=None)
-    return (proc, __context__)
+def read(run=None, env=None, **kwargs):
+    return UnixPipeProcess(['cat', run], env=env, stdin=None)
 
 
-def write(run=None, env=None, __context__=None, **kwargs):
+def write(run=None, env=None, **kwargs):
     cmd = ['dd', 'status=none', f'of={run}']
-    proc = UnixPipeProcess(cmd, env=env, stdout=None)
-    return (proc, __context__)
+    return UnixPipeProcess(cmd, env=env, stdout=None)    
 
 
-def stdin(run=None, env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess(['cat'], env=env, stdin=sys.stdin)
-    return (proc, __context__)
+def stdin(run=None, env=None, **kwargs):
+    return UnixPipeProcess(['cat'], env=env, stdin=sys.stdin)
 
 
-def stdout(run=None, env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess(['tee'], env=env, stdout=sys.stdout)
-    return (proc, __context__)
+def stdout(run=None, env=None, **kwargs):
+    return UnixPipeProcess(['tee'], env=env, stdout=sys.stdout)

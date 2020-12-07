@@ -29,44 +29,30 @@ def __virtual__():
     return __virtualname__
 
 
-def awk(run=None, env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess(['awk', run], env=env)
-    return (proc, __context__)
+def awk(run=None, env=None, **kwargs):
+    return UnixPipeProcess(['awk', run], env=env)
 
 
-def grep(run=None, env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess(['grep', run], env=env)
-    return (proc, __context__)
+def grep(run=None, env=None, **kwargs):
+    return UnixPipeProcess(['grep', run], env=env)
 
 
-def head(run=None, env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess(['head', '-n{run}'], env=env)
-    return (proc, __context__)
+def head(run=None, env=None, **kwargs):
+    return UnixPipeProcess(['head', '-n{run}'], env=env)
 
 
-def match(run=None, env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess(['awk', f'/{run}/'], env=env)
-    return (proc, __context__)
+def match(run=None, env=None, **kwargs):
+    return UnixPipeProcess(['awk', f'/{run}/'], env=env)
 
 
-def replace(
-    run=None,
-    search='\\n',
-    replace='\\n',
-    env=None,
-    __context__=None,
-    **kwargs
-):
+def replace(run=None, search='\\n', replace='\\n', env=None, **kwargs):
     cmd = f"awk 'BEGIN {{ RS=\"{search}\"; ORS=\"{replace}\" }} 1'"
-    proc = UnixPipeProcess(shlex.split(cmd), env=env)
-    return (proc, __context__)
+    return UnixPipeProcess(shlex.split(cmd), env=env)
 
 
-def sed(run=None, env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess(['sed', run], env=env)
-    return (proc, __context__)
+def sed(run=None, env=None, **kwargs):
+    return UnixPipeProcess(['sed', run], env=env)
 
 
-def tail(run=None, env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess(['tail', '-n{run}'], env=env)
-    return (proc, __context__)
+def tail(run=None, env=None, **kwargs):
+    return UnixPipeProcess(['tail', '-n{run}'], env=env)

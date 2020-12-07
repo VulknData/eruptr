@@ -28,6 +28,5 @@ def __virtual__():
     return __virtualname__
 
 
-def xml2kv(run=None, env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess(['xml2'], env=env)
-    return (proc, __context__)
+def xml2kv(run=None, env=None, **kwargs):
+    return UnixPipeProcess(['xml2'], env=env)

@@ -34,7 +34,6 @@ def local(
     input_format=None,
     output_format=None,
     env=None,
-    __context__=None,
     **kwargs
 ):
     cmd = ['clickhouse-local', '--query', run]
@@ -48,4 +47,4 @@ def local(
     if output_format:
         cmd += ['--output-format', output_format]
     proc = UnixPipeProcess(cmd, env=env)
-    return (proc, __context__)
+    return proc

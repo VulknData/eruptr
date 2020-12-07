@@ -101,7 +101,7 @@ def cli_args(subparsers, parent_parsers):
 class EruptrLoad(EruptrCommand):
     def _execute_step_stage(self, stage, **kwargs):
         log.info(f'Executing {stage} section')
-        s = StepExecutor(self._cfg.get(stage, []), **kwargs)
+        s = StepExecutor(stage, self._cfg.get(stage, []), **kwargs)
         if not self._opts.test:
             s.execute()
 
@@ -111,7 +111,7 @@ class EruptrLoad(EruptrCommand):
         if self._input:
             task = {self._input: {'run': self._source}}
             stages = [task] + stages[1:]
-        s = UnixPipeExecutor(stages, **kwargs)
+        s = UnixPipeExecutor(stage, stages, **kwargs)
         if not self._opts.test:
             s.execute()
 
