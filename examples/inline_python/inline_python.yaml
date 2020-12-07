@@ -43,9 +43,8 @@ data:
       output_file: {{ vars.output_file }}
 clean:
   - tasks.file.delete:
-      run:
-        - {{ vars.output_file }}
-        - zabbix_piped_through_python.json
+    - {{ vars.output_file }}
+    - zabbix_piped_through_python.json
 input:
   - io.file.read: {{ vars.output_file }}
   - pipes.unpack.unpack

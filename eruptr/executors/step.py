@@ -73,9 +73,17 @@ class StepExecutor:
                 continue
             task_module = list(step.keys())[0]
             task_args = step[task_module]
-            if isinstance(task_args, dict):
-                if isinstance(task_args.get('run'), list):
-                    run_args = task_args.pop('run')
+            if isinstance(task_args, dict) or isinstance(task_args, list):
+                if (
+                    isinstance(task_args, list) or
+                    isinstance(task_args.get('run'), list)
+                ):
+                    run_args = []
+                    if isinstance(task_args, list):
+                        run_args = task_args
+                        task_args = {}
+                    else:
+                        run_args = task_args.pop('run')
                     for t in run_args:
                         log.debug(
                             f"{task_module}({t}, { {**self._kwargs, **task_args} })"
