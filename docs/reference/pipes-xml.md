@@ -10,7 +10,6 @@ any specific repeating row structure - nested structures are fine.
     * `run: str=None` - ignored.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 * Example. Given the following XML structure -

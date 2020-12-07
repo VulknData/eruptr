@@ -8,7 +8,6 @@ Read a file from a local filesystem.
     * `run: str=None` - the filename to read
     * `tag: str=None` - optional user-defined tag for the resource
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 * YAML
@@ -28,7 +27,6 @@ Write to a file on the local filesystem.
     * `run` - the filename to write
     * `tag: str=None` - optional user-defined tag for the resource
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 * YAML
@@ -49,7 +47,6 @@ Read the file as a data stream on stdin.
 * Parameters
     * `tag: str=None` - optional user-defined tag for the resource
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 * YAML

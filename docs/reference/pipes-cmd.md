@@ -10,7 +10,6 @@ is better for processing text/data if possible.
     * `run: str=None` - the command to pipe the data through.
     * `tag: str=None` - optional user-defined tag for the resource
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 
@@ -41,7 +40,6 @@ within the shell.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `shell: str='/bin/sh'` - the shell to execute the pipeline in.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 ```yaml
@@ -65,7 +63,6 @@ back to stdout. Only data from stdout will be fed back through the pipeline.
     * `tag: str=None` - optional user-defined tag for the resource
     * `shell: str='/bin/sh'` - the shell to execute the pipeline in.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 ```yaml

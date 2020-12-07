@@ -8,7 +8,6 @@ Pipes the incoming text stream through AWK.
     * `run: str` - the awk program to pipe the stream through.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 
@@ -40,7 +39,6 @@ Uses grep to selectively allow only matched lines through the pipeline.
     * `run: str` - the text to match for.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 
@@ -61,7 +59,6 @@ Uses head to exclude lines from the input stream.
     -n(+-run).
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 
@@ -82,7 +79,6 @@ through the pipeline.
     * `run: str` - the text to match for.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 
@@ -104,7 +100,6 @@ Uses grep to selectively allow only matched lines through the pipeline.
     * `replace: str='\n'` - the text to replace the searched text with.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 
@@ -125,7 +120,6 @@ Pipes the incoming text stream through sed.
     * `run: str` - the sed program to pipe the stream through.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 
@@ -149,7 +143,6 @@ Uses tail to exclude lines from the input stream.
     -n(+-run).
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 

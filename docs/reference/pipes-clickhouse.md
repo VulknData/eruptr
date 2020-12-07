@@ -13,7 +13,6 @@ the data is returned as-is applying any output format transformations.
     * `input_format: str='formats.clickhouse.CSV'` - the format for the input stream.
     * `output_format: str='formats.clickhouse.CSV'` - the format for the output stream.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 * YAML

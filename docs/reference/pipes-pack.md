@@ -10,7 +10,6 @@ as the key.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `flags: list=None` - optional list of flags for the pack operation.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 
@@ -30,7 +29,6 @@ A shorthand for `run='gz'` using the pipes.pack.pack module.
     * `tag: str=None` - optional user-defined tag for the resource
     * `flags: list=None` - optional list of flags for the pack operation.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 
@@ -50,7 +48,6 @@ A shorthand for `run=bz2` using the pipes.pack.pack module.
     * `tag: str=None` - optional user-defined tag for the resource
     * `flags: list=None` - optional list of flags for the pack operation.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 ## pipes.pack.xz
@@ -62,7 +59,6 @@ A shorthand for `run=xz` using the pipes.pack.pack module.
     * `tag: str=None` - optional user-defined tag for the resource
     * `flags: list=None` - optional list of flags for the pack operation.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 ## pipes.pack.lz
@@ -74,5 +70,4 @@ A shorthand for `run=lz4` using the pipes.pack.pack module.
     * `tag: str=None` - optional user-defined tag for the resource
     * `flags: list=None` - optional list of flags for the pack operation.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
