@@ -1,9 +1,30 @@
 name: Python runcode example
+help: |
+  Provides an example of the pipes inline python command. This example 
+  doesn't write to a database and uses the local filesystem only.
+
+  Flows:
+  ======
+    default
+
+      Use the inline python command and generate the file 
+      zabbix_piped_through_python.json in your current working directory.
+
+    --flows data
+
+      Use --flows data to generate the example dataset. This will create the 
+      file {{ vars.output_file }} in your current working directory.
+
+    --flows clean
+
+      Use --flows clean to remove the generated files.
 driver: local
 cluster: http://localhost
 shard: http://localhost
 workflow:
   - data:
+      executor: StepExecutor
+  - clean:
       executor: StepExecutor
   - input:
       executor: UnixPipeExecutor
@@ -20,6 +41,11 @@ data:
   - tasks.pack.gz:
       input_file: zabbix_data_test.csv
       output_file: {{ vars.output_file }}
+clean:
+  - tasks.file.delete:
+      run:
+        - {{ vars.output_file }}
+        - zabbix_piped_through_python.json
 input:
   - io.file.read: {{ vars.output_file }}
   - pipes.unpack.unpack

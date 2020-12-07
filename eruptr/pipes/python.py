@@ -40,8 +40,9 @@ def runcode(run=None, python='python', env=None, **kwargs):
             if self._script_file:
                 os.remove(self._script_file)
 
+    cmd = PipesPythonRuncode(run, python)
     return UnixPipeProcess(
-        PipesPythonRuncode(run, python),
+        cmd,
         env=env,
         on_start=cmd.on_start,
         on_end=cmd.on_end
