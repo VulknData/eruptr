@@ -53,7 +53,11 @@ nav:
     - Data Ingestion: commands/load-index.md
     - Data Ingestion YAML Reference: commands/load-reference.md
     - Format Conversion: commands/convert-index.md
-  - Module Reference:
+  - Modules:
+    - User Modules: modules/user.md
+    - Authoring: modules/authoring.md
+    - Contributing: modules/contributing.md
+  - Reference:
     - utils: reference/utils.md
     - engines.clickhouse: reference/engines-clickhouse.md
     - formats.clickhouse: reference/formats-clickhouse.md
