@@ -98,11 +98,11 @@ def _load_module_from_path(ltype, basepath, use_module_name=False):
     if ltype == 'locks':
         use_module_name = True
     if not os.path.exists(basepath):
-        log.error(f'Base path {basepath} does not exist')
+        log.warning(f'Base path {basepath} does not exist')
         return (mod_funcs, mod_libs)
     mod_path = basepath
     if not os.path.exists(mod_path):
-        log.error(f'Module path {mod_path} does not exist')
+        log.warning(f'Module path {mod_path} does not exist')
         return (mod_funcs, mod_libs)
     for f in filter(
         lambda x: not x.endswith('/__init__.py'),
