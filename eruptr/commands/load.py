@@ -95,6 +95,13 @@ def cli_args(subparsers, parent_parsers):
         help="""Like test mode but outputs the rendered configuration only.
             Executors are not setup."""
     )
+    g.add_argument(
+        '--docs',
+        dest='docs',
+        action='store_true',
+        default=False,
+        help="""Print the load task documentation to the console and exit."""
+    )
     g.set_defaults(cls=EruptrLoad)
 
 
@@ -218,6 +225,10 @@ class EruptrLoad(EruptrCommand):
                     sort_keys=False
                 ).strip()
             )
+            return 0
+        if self._opts.docs:
+            if 'help' in self._cfg:
+                print(f"\n{self._cfg['help']}")
             return 0
         kwargs = {
             **self._cfg.get('params', {}),
