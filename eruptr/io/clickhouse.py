@@ -41,7 +41,6 @@ def local(
     run=None,
     format=None,
     env=None,
-    __context__=None,
     **kwargs
 ):
     if run is None:
@@ -49,8 +48,7 @@ def local(
     cmd = ['clickhouse-local', '--query', run]
     if format:
         cmd += ['--output-format', format]
-    proc = UnixPipeProcess(cmd, env=env, stdout=subprocess.PIPE, stdin=None)
-    return (proc, __context__)
+    return UnixPipeProcess(cmd, env=env, stdout=subprocess.PIPE, stdin=None)
 
 
 def select(
@@ -58,7 +56,6 @@ def select(
     connection=None,
     format=None,
     env=None,
-    __context__=[],
     **kwargs
 ):
     options = {k:v for k,v in kwargs.items()}
@@ -73,8 +70,7 @@ def select(
             cmd += [f'--{k}', v]
     for k, v in options.items():
         cmd += [f'--{k}', str(v)]
-    proc = UnixPipeProcess(cmd, env=env, stdout=subprocess.PIPE, stdin=None)
-    return (proc, __context__)
+    return UnixPipeProcess(cmd, env=env, stdout=subprocess.PIPE, stdin=None)
 
 
 def write(
@@ -84,7 +80,6 @@ def write(
     format=None,
     columns=None,
     env=None,
-    __context__=[],
     **kwargs
 ):
     query = run
@@ -109,6 +104,4 @@ def write(
             cmd += [f'--{k}', str(v)]
     for k, v in options.items():
         cmd += [f'--{k}', str(v)]
-
-    proc = UnixPipeProcess(cmd, env=env, stdout=None)
-    return (proc, __context__)
+    return UnixPipeProcess(cmd, env=env, stdout=None)

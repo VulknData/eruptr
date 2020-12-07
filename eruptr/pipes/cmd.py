@@ -30,16 +30,14 @@ def __virtual__():
     return __virtualname__
 
 
-def cmd(run=None, env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess(shlex.split(run), env=env)
-    return (proc, __context__)
+def cmd(run=None, env=None, **kwargs):
+    return UnixPipeProcess(shlex.split(run), env=env)
 
 
-def shell(run=None, shell='/bin/sh', env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess([shell, '-c', run], env=env)
-    return (proc, __context__)
+def shell(run=None, shell='/bin/sh', env=None, **kwargs):
+    return UnixPipeProcess([shell, '-c', run], env=env)
 
 
-def script(run=None, shell='/bin/sh', env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess([shell, '-c', run], env=env)
-    return (proc, __context__)
+def script(run=None, shell='/bin/sh', env=None, **kwargs):
+    return UnixPipeProcess([shell, '-c', run], env=env)
+    

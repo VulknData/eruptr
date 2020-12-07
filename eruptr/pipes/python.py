@@ -18,7 +18,7 @@ log = logging.getLogger()
 __virtualname__ = 'pipes.python'
 
 
-def runcode(run=None, python='python', env=None, __context__=None, **kwargs):
+def runcode(run=None, python='python', env=None, **kwargs):
     class PipesPythonRuncode:
         def __init__(self, run, python):
             self._run = run
@@ -40,16 +40,13 @@ def runcode(run=None, python='python', env=None, __context__=None, **kwargs):
             if self._script_file:
                 os.remove(self._script_file)
 
-    cmd = PipesPythonRuncode(run, python)
-    proc = UnixPipeProcess(
-        cmd,
+    return UnixPipeProcess(
+        PipesPythonRuncode(run, python),
         env=env,
         on_start=cmd.on_start,
         on_end=cmd.on_end
     )
-    return (proc, __context__)
 
 
-def runscript(run=None, python='python', env=None, __context__=None, **kwargs):
-    proc = UnixPipeProcess([python, run], env=env)
-    return (proc, __context__)
+def runscript(run=None, python='python', env=None, **kwargs):
+    return UnixPipeProcess([python, run], env=env)

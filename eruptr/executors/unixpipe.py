@@ -74,20 +74,20 @@ def build_dag_task(process, **kwargs):
 
     if isinstance(process, str):
         task_args = {**{'run': process}, **kwargs}
-        proc = None
+        task = None
         if process in __eruptr__.keys():
-            proc = __eruptr__[process]
+            task = process
             task_args = {**{'run': None}, **kwargs}
         elif process.strip().lower().startswith('select'):
-            proc = __eruptr__[__handlers__['io_sql_read']]
+            task = __handlers__['io_sql_read']
         elif process.strip().lower().startswith('insert'):
-            proc = __eruptr__[__handlers__['io_sql_write']]
+            task = __handlers__['io_sql_write']
         else:
-            proc = __eruptr__[__handlers__['pipes_command']]
-        stages.append((proc, task_args))
+            task = __handlers__['pipes_command']
+        stages.append((task, task_args))
     else:
         module = list(process.keys())[0]
-        proc = __eruptr__[module]
+        task = module
         task_args = process[module]
         run_args = None
         if isinstance(task_args, dict):
@@ -96,15 +96,15 @@ def build_dag_task(process, **kwargs):
                 if run_args:
                     for t in run_args:
                         stages.append(
-                            (proc, {**{'run': t}, **kwargs, **task_args})
+                            (task, {**{'run': t}, **kwargs, **task_args})
                         )
             else:
-                stages.append((proc, {**kwargs, **task_args}))
+                stages.append((task, {**kwargs, **task_args}))
         elif isinstance(task_args, str):
             task_args = {**{'run': task_args}, **kwargs}
-            stages.append((proc, task_args))
+            stages.append((task, task_args))
         else:      
-            stages.append((proc, {**kwargs, **task_args}))
+            stages.append((task, {**kwargs, **task_args}))
     return stages
 
 
@@ -112,36 +112,27 @@ def build_dag_config(pipeline, **kwargs):
     dag_config = []
     for process in pipeline:
         for task in build_dag_task(process, **kwargs):
-            log.debug(f'DAG config: Added stage {task}')
+            log.debug(f'DAG config: Added task {task}')
             dag_config.append(task)
     return dag_config
 
 
-def build_dag(dag_config):
-    dag = []
-    context = Context()
-    for i, task in enumerate(dag_config):
-        __context__ = context if i == 0 else dag[i-1][1]
-        proc = task[0](**task[1], __context__=__context__)
-        if i > 0:
-            proc[0].stdin = dag[i-1][0].stdout
-        log.debug(f'Scheduling process {proc}')
-        dag.append(proc)
-    return dag
-
-
-def assemble_pipeline(dag):
+def assemble_pipeline(flow, dag):
     pipeline = []
     end_hooks = []
-    for i, proc in enumerate(dag):
-        proc[0].on_start_hook()
-        end_hooks.append(proc[0].on_end_hook)
-        stdin = proc[0].stdin if i == 0 else pipeline[i-1].stdout
+    __eruptr__ = eruptr.modules.__eruptr__
+    __context__ = eruptr.modules.__context__
+    for i, task in enumerate(dag):
+        __context__.next(flow, task[0], task[1])
+        proc = __eruptr__[task[0]](**task[1])
+        proc.on_start_hook()
+        end_hooks.append(proc.on_end_hook)
+        stdin = proc.stdin if i == 0 else pipeline[i-1].stdout
         sub = subprocess.Popen(
-            proc[0].cmd,
-            env=proc[0].env or {'LC_ALL': 'C'},
+            proc.cmd,
+            env=proc.env or {'LC_ALL': 'C'},
             stdin=stdin,
-            stdout=proc[0].stdout or subprocess.PIPE,
+            stdout=proc.stdout or subprocess.PIPE,
             stderr=subprocess.PIPE
         )
         pipeline.append(sub)
@@ -168,7 +159,8 @@ def execute_pipeline(pipeline):
 
 
 class UnixPipeExecutor:
-    def __init__(self, pipes, **kwargs):
+    def __init__(self, flow, pipes, **kwargs):
+        self._flow = flow
         self._pipes = pipes
         self._kwargs = kwargs
 
@@ -176,8 +168,7 @@ class UnixPipeExecutor:
     def execute(self):
         dag_config = build_dag_config(self._pipes, **self._kwargs)
         log.info(UnixPipeExecutor.print_config(dag_config))
-        dag = build_dag(dag_config)
-        pipeline, end_hooks = assemble_pipeline(dag)
+        pipeline, end_hooks = assemble_pipeline(self._flow, dag_config)
         ret = execute_pipeline(pipeline)
         for fn in end_hooks:
             fn()
