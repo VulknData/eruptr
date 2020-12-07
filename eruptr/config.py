@@ -60,6 +60,10 @@ workflow = [
     {'transform': {'executor': 'StepExecutor', 'enabled': True, 'max_tasks': 1}}
 ]
 
+settings = {
+    'default_executor': 'StepExecutor'
+}
+
 def render_templates(config_file, opts, variables, cfg={}):
     global __handlers__
     __eruptr__ = eruptr.modules.__eruptr__
@@ -123,6 +127,16 @@ def render_templates(config_file, opts, variables, cfg={}):
         ret['vars'] = variables
     if not ret.get('workflow'):
         ret['workflow'] = workflow
+    for i in range(len(ret['workflow'])):
+        if isinstance(ret['workflow'][i], str):
+            w = {
+                ret['workflow'][i]: {
+                    'executor': settings['default_executor'],
+                    'retry': False,
+                    'enabled': False
+                }
+            }
+            ret['workflow'][i] = w
     if ret.get('vars'):
         for k, task_args in ret['vars'].items():
             if isinstance(task_args, str):

@@ -22,10 +22,8 @@ driver: local
 cluster: http://localhost
 shard: http://localhost
 workflow:
-  - data:
-      executor: StepExecutor
-  - clean:
-      executor: StepExecutor
+  - data
+  - clean
   - input:
       executor: UnixPipeExecutor
       enabled: true
