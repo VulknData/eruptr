@@ -9,7 +9,6 @@ Run a query using clickhouse.local.
     * `tag: str=None` - optional user-defined tag for the resource
     * `format: str=formats.clickhouse.CSV` - the output format for the query
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 
@@ -31,7 +30,6 @@ Run a query against the ClickHouse datasource.
     * `format: str=None` - the input data format.
     * `connection: str=None` - the connection string for the database.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 
@@ -54,7 +52,6 @@ input:
     * `format: str=None` - the input data format.
     * `connection: str=None` - the connection string for the database.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML - simple file load
 

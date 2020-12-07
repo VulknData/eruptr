@@ -9,7 +9,6 @@ as the key.
     * `run: str='gz'` - the packing method to use when compressing.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 * YAML
 
@@ -28,8 +27,7 @@ A shorthand for `run='gz'` using the pipes.unpack.unpack function.
 * Parameters:
     * `run: str=None` - this parameter is ignored.
     * `tag: str=None` - optional user-defined tag for the resource.
-    * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
+    * `env: dict=None` - additional Popen environment variable.    
     * `**kwargs` - other keyword args
 
 * YAML
@@ -49,7 +47,6 @@ A shorthand for `run=bz2` using the pipes.unpack.unpack function.
     * `run: str=None` - this parameter is ignored.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 ## pipes.unpack.xz
@@ -60,7 +57,6 @@ A shorthand for `run=xz` using the pipes.unpack.unpack function.
     * `run: str=None` - this parameter is ignored.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 ## pipes.unpack.lz
@@ -71,5 +67,4 @@ A shorthand for `run=lz4` using the pipes.unpack.unpack function.
     * `run: str=None` - this parameter is ignored.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args

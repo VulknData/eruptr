@@ -14,7 +14,6 @@ preferred method however `pipes.python.run` may be useful for small blocks of co
     qualified path to the binary.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 * YAML
@@ -49,7 +48,6 @@ Executes the Python script.
     qualified path to the binary.
     * `tag: str=None` - optional user-defined tag for the resource.
     * `env: dict=None` - additional Popen environment variables
-    * `__context__` - run context
     * `**kwargs` - other keyword args
 
 * YAML
