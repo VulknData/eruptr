@@ -12,6 +12,7 @@ import inspect
 import glob
 import subprocess
 import logging
+import jinja2
 from importlib import util
 
 import eruptr.config
@@ -117,14 +118,36 @@ def build_dag_config(pipeline, **kwargs):
     return dag_config
 
 
-def assemble_pipeline(flow, dag):
+def assemble_pipeline(flow, dag, opts=None, variables=None, config=None):
     pipeline = []
     end_hooks = []
     __eruptr__ = eruptr.modules.__eruptr__
     __context__ = eruptr.modules.__context__
+    j2env = jinja2.Environment(
+        loader=jinja2.BaseLoader(),
+        block_start_string='$%',
+        block_end_string='%$',
+        variable_start_string='$$',
+        variable_end_string='$$'
+    )
     for i, task in enumerate(dag):
         __context__.next(flow, task[0], task[1])
-        proc = __eruptr__[task[0]](**task[1])
+        kwargs = {}
+        for k, v in task[1].items():
+            t = None
+            if v:
+                t = j2env.from_string(v).render(
+                    opts=opts or {},
+                    vars=variables or {},
+                    cfg=config or {},
+                    engines=eruptr.modules.__engines__,
+                    tasks=eruptr.modules.__tasks__,
+                    context=__context__
+                )
+            kwargs[k] = t
+        log.debug(f'Rendered kwargs: {kwargs}')
+        proc = __eruptr__[task[0]](**kwargs)
+        __context__.current._kwargs = kwargs
         proc.on_start_hook()
         end_hooks.append(proc.on_end_hook)
         stdin = proc.stdin if i == 0 else pipeline[i-1].stdout
@@ -159,16 +182,33 @@ def execute_pipeline(pipeline):
 
 
 class UnixPipeExecutor:
-    def __init__(self, flow, pipes, **kwargs):
+    def __init__(
+        self,
+        flow,
+        pipes,
+        opts=None,
+        variables=None,
+        config=None,
+        **kwargs
+    ):
         self._flow = flow
         self._pipes = pipes
+        self._opts = opts
+        self._variables = variables
+        self._config = config
         self._kwargs = kwargs
 
     @eruptr.utils.timer
     def execute(self):
         dag_config = build_dag_config(self._pipes, **self._kwargs)
         log.info(UnixPipeExecutor.print_config(dag_config))
-        pipeline, end_hooks = assemble_pipeline(self._flow, dag_config)
+        pipeline, end_hooks = assemble_pipeline(
+            self._flow,
+            dag_config,
+            opts=self._opts,
+            variables=self._variables,
+            config=self._config
+        )
         ret = execute_pipeline(pipeline)
         for fn in end_hooks:
             fn()

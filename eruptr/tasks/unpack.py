@@ -47,6 +47,7 @@ _MAPPINGS = {
 @eruptr.utils.timer
 def unpack(
     run=None,
+    tag=None,
     connection=None,
     input_file=None,
     output_file=None,
