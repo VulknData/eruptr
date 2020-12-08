@@ -12,6 +12,7 @@ import inspect
 import glob
 import subprocess
 import logging
+import jinja2
 from importlib import util
 
 
@@ -43,10 +44,45 @@ def _default_str_task(step):
     return 'task_command'
 
 
+def render_kwargs(funcargs, opts, variables, cfg, context):
+    j2env = jinja2.Environment(
+        loader=jinja2.BaseLoader(),
+        block_start_string='$%',
+        block_end_string='%$',
+        variable_start_string='$$',
+        variable_end_string='$$'
+    )
+    kwargs = {}
+    for k, v in funcargs.items():
+        t = None
+        if v:
+            t = j2env.from_string(v).render(
+                opts=opts or {},
+                vars=variables or {},
+                cfg=cfg or {},
+                engines=eruptr.modules.__engines__,
+                tasks=eruptr.modules.__tasks__,
+                context=context
+            )
+        kwargs[k] = t
+    return kwargs
+
+
 class StepExecutor:
-    def __init__(self, flow, steps, **kwargs):
+    def __init__(
+        self,
+        flow,
+        steps,
+        opts=None,
+        variables=None,
+        config=None,
+        **kwargs
+    ):
         self._flow = flow
         self._steps = steps
+        self._opts = opts
+        self._vars = variables
+        self._cfg = config
         self._kwargs = kwargs
 
     def execute(self):
@@ -60,16 +96,30 @@ class StepExecutor:
                 task = _default_str_task(step)
                 if task == step:
                     log.debug(f"{task}({self._kwargs})")
-                    __context__.next(self._flow, task, self._kwargs)
-                    ret = __eruptr__[task](**self._kwargs)
+                    pre_kwargs = self._kwargs
+                    __context__.next(self._flow, task, pre_kwargs)
+                    kwargs = render_kwargs(
+                        pre_kwargs,
+                        opts=self._opts,
+                        variables=self._vars,
+                        cfg=self._cfg,
+                        context=__context__
+                    )
+                    __context__.current._kwargs = kwargs
+                    ret = __eruptr__[task](**kwargs)
                 else:
                     log.debug(f"{__handlers__[task]}({step}, {self._kwargs})")
-                    __context__.next(
-                        self._flow,
-                        __handlers__[task],
-                        {**{'run': step}, **self._kwargs}
+                    pre_kwargs = {**{'run': step}, **self._kwargs}
+                    __context__.next(self._flow, __handlers__[task], pre_kwargs)
+                    kwargs = render_kwargs(
+                        pre_kwargs,
+                        opts=self._opts,
+                        variables=self._vars,
+                        cfg=self._cfg,
+                        context=__context__
                     )
-                    ret = __eruptr__[__handlers__[task]](step, **self._kwargs)
+                    __context__.current._kwargs = kwargs
+                    ret = __eruptr__[__handlers__[task]](step, **kwargs)
                 continue
             task_module = list(step.keys())[0]
             task_args = step[task_module]
@@ -88,31 +138,45 @@ class StepExecutor:
                         log.debug(
                             f"{task_module}({t}, { {**self._kwargs, **task_args} })"
                         )
-                        __context__.next(
-                            self._flow,
-                            task_module,
-                            {**{'run': t}, **{**self._kwargs, **task_args}}
+                        pre_kwargs = {**{'run': t}, **{**self._kwargs, **task_args}}
+                        __context__.next(self._flow, task_module, pre_kwargs)
+                        kwargs = render_kwargs(
+                            pre_kwargs,
+                            opts=self._opts,
+                            variables=self._vars,
+                            cfg=self._cfg,
+                            context=__context__
                         )
-                        ret = __eruptr__[task_module](
-                            t,
-                            **{**self._kwargs, **task_args}
-                        )
+                        __context__.current._kwargs = kwargs
+                        ret = __eruptr__[task_module](**kwargs)
                 else:
                     log.debug(
                         f"{task_module}({ {**self._kwargs, **task_args} })"
                     )
-                    __context__.next(
-                        self._flow,
-                        task_module,
-                        {**self._kwargs, **task_args}
+                    pre_kwargs = {**self._kwargs, **task_args}
+                    __context__.next(self._flow, task_module, pre_kwargs)
+                    kwargs = render_kwargs(
+                        {**self._kwargs, **task_args},
+                        opts=self._opts,
+                        variables=self._vars,
+                        cfg=self._cfg,
+                        context=__context__
                     )
-                    ret = __eruptr__[task_module](
-                        **{**self._kwargs, **task_args}
-                    )
+                    __context__.current._kwargs = kwargs
+                    ret = __eruptr__[task_module](**kwargs)
             else:
                 log.debug(f"{task_module}({task_args} {self._kwargs})")
-                __context__.next(self._flow, task_module, self._kwargs)
-                ret = __eruptr__[task_module](task_args, **self._kwargs)
+                pre_kwargs = self._kwargs
+                __context__.next(self._flow, task_module, pre_kwargs)
+                kwargs = render_kwargs(
+                    self._kwargs,
+                    opts=self._opts,
+                    variables=self._vars,
+                    cfg=self._cfg,
+                    context=__context__
+                )
+                __context__.current._kwargs = kwargs
+                ret = __eruptr__[task_module](task_args, **kwargs)
             if ret.retcode != 0:
                 print(ret)
                 raise Exception('Failed')
